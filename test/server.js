@@ -27,6 +27,7 @@ describe('support for Buffers', function () {
 				expect(txt).to.equal('buffer');
 			});
 	});
+
 });
 
 describe('new non-global use', function () {

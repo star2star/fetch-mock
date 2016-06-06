@@ -55,9 +55,13 @@ function mockResponse (url, responseConfig, fetchOpts) {
 	if (stream) {
 		let s = new stream.Readable();
 		if (body != null) { //eslint-disable-line
-			s.push(body, 'utf-8');
+			if (typeof body === 'string') {
+				s.pipe(body, 'utf8');
+			} else {
+				s.pipe(body);
+			}
 		}
-		s.push(null);
+		s.pipe(null);
 		body = s;
 	}
 

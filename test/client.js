@@ -36,6 +36,18 @@ describe('request types that only work in the browser', function () {
 				});
 			});
 	});
+
+	it.only('can respond with an Arraybuffer', function () {
+		fetchMock.mock(/a/, {
+			sendAsJson: false,
+			body: Int8Array.from(Array.from('buffer')).buffer
+		})
+		return fetch('http://a.com')
+			.then(res => res.arrayBuffer())
+			.then(txt => {
+				expect(txt).to.equal('buffer');
+			});
+	});
 });
 
 require('./spec')(fetchMock, window, window.Request);
