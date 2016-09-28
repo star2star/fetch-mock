@@ -6,7 +6,7 @@ let Response;
 let stream;
 let theGlobal;
 let statusTextMap;
-
+let debug = () => null;
 
 /**
  * normalizeRequest
@@ -125,6 +125,7 @@ class FetchMock {
 	 * @param  {Object} opts
 	 */
 	constructor (opts) {
+		this.opts = opts;
 		this.config = {
 			sendAsJson: true
 		}
@@ -141,7 +142,6 @@ class FetchMock {
 		this.fetchMock = this.fetchMock.bind(this);
 		this.restore = this.restore.bind(this);
 		this.reset = this.reset.bind(this);
-
 	}
 
 	/**
@@ -214,7 +214,9 @@ class FetchMock {
 		if (this.fallbackResponse) {
 			console.warn(`calling fetchMock.catch() twice - are you sure you want to overwrite the previous fallback response`);
 		}
+
 		this.fallbackResponse = response || 'ok';
+		debug('Fallback response defined:', this.fallbackResponse);
 		return this._mock();
 	}
 
@@ -227,7 +229,7 @@ class FetchMock {
 	 *                         a promise of a Response, or forwading to native fetch
 	 */
 	fetchMock (url, opts) {
-
+		debug('Trying to match fetch call:', url, opts)
 		let response = this.router(url, opts);
 
 		if (!response) {
@@ -242,10 +244,12 @@ class FetchMock {
 		}
 
 		if (typeof response === 'function') {
+			debug('Response is a function - calling to build response object')
 			response = response (url, opts);
 		}
 
 		if (typeof response.then === 'function') {
+			debug('Response is a promise - thening to retrieve response object')
 			return response.then(response => this.mockResponse(url, response, opts))
 		} else {
 			return this.mockResponse(url, response, opts)
@@ -255,7 +259,7 @@ class FetchMock {
 
 	/**
 	 * router
-	 * Given url + options or a Request object, checks to see if ait is matched by any routes and returns
+	 * Given url + options or a Request object, checks to see if it is matched by any routes and returns
 	 * config for a response or undefined.
 	 * @param  {String|Request} url
 	 * @param  {Object}
@@ -438,6 +442,10 @@ e.g. {"body": {"status: "registered"}}`);
 
 	configure (opts) {
 		Object.assign(this.config, opts);
+	}
+
+	debug () {
+		debug = this.opts.debug;
 	}
 }
 
