@@ -95,7 +95,11 @@ module.exports = function (route, Request) {
 
 	if (route.times) {
 		let timesLeft = route.times;
+		route.isMocked = (url,options) =>{
+			return (matcher(url, options))
+		}
 		route.matcher = (url, options) => {
+			console.log(`matcher: ${timesLeft}, ${JSON.stringify(options)}`)
 			const match = timesLeft && matcher(url, options);
 			if (match) {
 				timesLeft--;

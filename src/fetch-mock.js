@@ -88,17 +88,36 @@ class FetchMock {
 		return this.catch(this.realFetch)
 	}
 
-	fetchMock (url, opts) {
+	isMocked(url, opts){
+		let route;
+		let bReturn = false;
+		for (let i = 0, il = this.routes.length; i < il ; i++) {
+			route = this.routes[i];
+			//console.log('****', route.name, route.matcher(url, opts))
+			if (route.isMocked(url, opts)) {
+				bReturn = true;
+				console.log('bbbbb', route, bReturn)
+			}
+		}
+		return bReturn;
+	}
 
+	fetchMock (url, opts) {
+		console.warn(`unmatched call to ${url}`);
 		let response = this.router(url, opts);
 
 		if (!response) {
-			console.warn(`unmatched call to ${url}`);
+
 			this.push(null, [url, opts]);
 
 			if (this.fallbackResponse) {
 				response = this.fallbackResponse;
 			} else {
+				if (!this.isMocked(url, opts)){
+					console.warn(`unmatched call to ${url} passing to realFetch ${JSON.stringify(opts)} ${this}`);
+					return this.realFetch.bind(this.global)(url,opts);
+				}
+
 				throw new Error(`unmatched call to ${url}`)
 			}
 		}
@@ -119,6 +138,7 @@ class FetchMock {
 		let route;
 		for (let i = 0, il = this.routes.length; i < il ; i++) {
 			route = this.routes[i];
+			//console.log('****', route.name, route.matcher(url, opts))
 			if (route.matcher(url, opts)) {
 				this.push(route.name, [url, opts]);
 				return route.response;
@@ -254,17 +274,21 @@ e.g. {"body": {"status: "registered"}}`);
 	}
 
 	done (name) {
+		//console.log('name: '+ name)
 		const names = name ? [name] : this.routes.map(r => r.name);
 		// Ideally would use array.every, but not widely supported
-		return names.map(name => {
+		var xReturn = names.map(name => {
 			if (!this.called(name)) {
 				return false
 			}
 			// would use array.find... but again not so widely supported
 			const expectedTimes = (this.routes.filter(r => r.name === name) || [{}])[0].times;
+			//console.log('TTTT:', expectedTimes, this.calls(name).length)
 			return !expectedTimes || (expectedTimes <= this.calls(name).length)
 		})
 			.filter(bool => !bool).length === 0
+
+		return xReturn;
 	}
 
 	configure (opts) {
