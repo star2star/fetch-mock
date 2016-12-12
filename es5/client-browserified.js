@@ -129,9 +129,7 @@ module.exports = function (route, Request) {
 	if (route.times) {
 		(function () {
 			var timesLeft = route.times;
-			route.isMocked = function (url, options) {
-				return matcher(url, options);
-			};
+
 			route.matcher = function (url, options) {
 				console.log('matcher: ' + timesLeft + ', ' + JSON.stringify(options));
 				var match = timesLeft && matcher(url, options);
@@ -147,6 +145,9 @@ module.exports = function (route, Request) {
 	} else {
 		route.matcher = matcher;
 	}
+	route.isMocked = function (url, options) {
+		return matcher(url, options);
+	};
 
 	return route;
 };
