@@ -275,7 +275,6 @@ var FetchMock = function () {
 		value: function fetchMock(url, opts) {
 			var _this = this;
 
-			console.warn('unmatched call to ' + url);
 			var response = this.router(url, opts);
 
 			if (!response) {
@@ -283,13 +282,14 @@ var FetchMock = function () {
 				this.push(null, [url, opts]);
 
 				if (this.fallbackResponse) {
+					console.warn('unmatched call to ' + url);
 					response = this.fallbackResponse;
 				} else {
 					if (!this.isMocked(url, opts)) {
 						console.warn('unmatched call to ' + url + ' passing to realFetch ' + JSON.stringify(opts) + ' ' + this);
 						return this.realFetch.bind(this.global)(url, opts);
 					}
-
+					console.warn('unmatched call to ' + url);
 					throw new Error('unmatched call to ' + url);
 				}
 			}
